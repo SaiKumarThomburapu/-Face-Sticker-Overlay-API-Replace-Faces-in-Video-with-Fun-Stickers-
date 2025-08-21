@@ -5,17 +5,11 @@ from fastapi.responses import FileResponse, JSONResponse
 from src.pipeline.upload_service import upload_service
 from src.pipeline.render_service import render_service
 from src.logger import logging
-# from src.constants import FACE_MODEL_NAME, FACE_MODEL_PROVIDERS
-# from insightface.app import FaceAnalysis
 
 app = FastAPI()
 
 # Ensure artifacts folder exists
 os.makedirs("artifacts", exist_ok=True)
-
-# Global face model (initialized with constants)
-# face_app = FaceAnalysis(name=FACE_MODEL_NAME, providers=FACE_MODEL_PROVIDERS)
-# face_app.prepare(ctx_id=0)
 
 # In-memory session storage
 session_data = {}
