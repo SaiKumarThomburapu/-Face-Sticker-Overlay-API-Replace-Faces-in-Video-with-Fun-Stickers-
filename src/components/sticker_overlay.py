@@ -1,17 +1,16 @@
 import cv2
 import sys
 import numpy as np
-from src.entity.artifacts import StickerOverlayArtifact
 from src.entity.config_entity import StickerOverlayConfig, ConfigEntity
 from src.logger import logging
 from src.exceptions import CustomException
 
 class StickerOverlay:
-    def __init__(self,config:StickerOverlayConfig):
-        self.sticker_overlay_config = config
+    def __init__(self):
+        self.config = StickerOverlayConfig(config=ConfigEntity()) 
         logging.info("StickerOverlay initialized")
     
-    def overlay(self, frame, bbox, sticker_img) -> StickerOverlayArtifact:
+    def overlay(self, frame, bbox, sticker_img):
         try:
             x1, y1, x2, y2 = bbox
             h, w = frame.shape[:2]
@@ -27,7 +26,7 @@ class StickerOverlay:
             
             if face_w <= 0 or face_h <= 0:
                 logging.warning("Invalid face dimensions, skipping overlay")
-                return StickerOverlayArtifact(frame=frame)
+                return frame
             
             sticker_resized = cv2.resize(sticker_img, (face_w, face_h))
             
@@ -44,7 +43,7 @@ class StickerOverlay:
                 frame[y1:y2, x1:x2] = sticker_resized[:, :, :3]
             
             logging.info("Sticker overlaid successfully")
-            return StickerOverlayArtifact(frame=frame)
+            return frame  #Direct return like working code
             
         except Exception as e:
             logging.error(f"Error in sticker overlay: {str(e)}")
