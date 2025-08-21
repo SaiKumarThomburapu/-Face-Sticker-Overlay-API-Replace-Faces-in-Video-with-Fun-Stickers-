@@ -12,10 +12,14 @@ class StickerOverlay:
     
     def overlay(self, frame, bbox, sticker_img):
         try:
+            if frame is None or sticker_img is None:
+                logging.warning("Frame or sticker is None, skipping overlay")
+                return frame
+
             x1, y1, x2, y2 = bbox
             h, w = frame.shape[:2]
             
-            # Ensure bounds are within frame
+            # Bounds clamp
             x1 = max(0, x1)
             y1 = max(0, y1)
             x2 = min(w, x2)
@@ -28,23 +32,35 @@ class StickerOverlay:
                 logging.warning("Invalid face dimensions, skipping overlay")
                 return frame
             
-            sticker_resized = cv2.resize(sticker_img, (face_w, face_h))
+            # make sure sticker is numpy array and correct dtype
+            sticker = np.array(sticker_img)
+            if sticker.dtype != np.uint8:
+                sticker = sticker.astype(np.uint8)
+
+            # ensure sticker has 3 or 4 channels
+            if sticker.ndim == 2:
+                sticker = cv2.cvtColor(sticker, cv2.COLOR_GRAY2BGRA)
+
+            if sticker.shape[2] == 3:
+                # add alpha channel (opaque) so we can unify the blending flow
+                alpha_channel = np.ones((sticker.shape[0], sticker.shape[1], 1), dtype=np.uint8) * 255
+                sticker = np.concatenate([sticker, alpha_channel], axis=2)
+
+            sticker_resized = cv2.resize(sticker, (face_w, face_h), interpolation=cv2.INTER_AREA)
+
+            # blending with alpha
+            alpha_s = sticker_resized[:, :, 3].astype(float) / 255.0
+            alpha_l = 1.0 - alpha_s
+
+            for c in range(3):
+                frame[y1:y2, x1:x2, c] = (
+                    alpha_s * sticker_resized[:, :, c] +
+                    alpha_l * frame[y1:y2, x1:x2, c]
+                ).astype(np.uint8)
             
-            # Handle alpha channel if present
-            if sticker_resized.shape[2] == 4:
-                alpha_s = sticker_resized[:, :, 3] / 255.0
-                alpha_l = 1.0 - alpha_s
-                for c in range(3):
-                    frame[y1:y2, x1:x2, c] = (
-                        alpha_s * sticker_resized[:, :, c] +
-                        alpha_l * frame[y1:y2, x1:x2, c]
-                    )
-            else:
-                frame[y1:y2, x1:x2] = sticker_resized[:, :, :3]
-            
-            logging.info("Sticker overlaid successfully")
-            return frame  #Direct return like working code
-            
+            logging.debug(f"Sticker overlaid at bbox {bbox}")
+            return frame
+
         except Exception as e:
             logging.error(f"Error in sticker overlay: {str(e)}")
             raise CustomException(e, sys)
