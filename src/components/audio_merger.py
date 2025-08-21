@@ -3,23 +3,26 @@ import subprocess
 import ffmpeg
 import sys
 from src.entity.artifacts import AudioMergerArtifact
-from src.entity.config_entity import AudioMergerConfig
+from src.entity.config_entity import AudioMergerConfig, ConfigEntity
 from src.logger import logging
 from src.exceptions import CustomException
 
 
 class AudioMerger:
-    def __init__(self, config: AudioMergerConfig):
-        self.config = config
+    def __init__(self):
+        self.config=AudioMergerConfig(config=ConfigEntity()) 
         logging.info("AudioMerger initialized")
 
     def merge(self, original_video, video_no_audio):
+        # final_output_path = os.path.join(
+        #     self.config.output_dir, session_id, self.config.final_output_filename
+        #     )
         try:
-            final_output_path = os.path.join(
-                self.config.output_dir, self.config.session_id, self.config.final_output_filename
-            )
+            session_dir=os.path.dirname(video_no_audio)
+            final_output_path=os.path.join(session_dir, self.config.final_output_filename)
+            
             temp_audio = os.path.join(
-                self.config.output_dir, self.config.session_id,
+                session_dir,
                 f"temp{self.config.temp_audio_extension}"
             )
 
