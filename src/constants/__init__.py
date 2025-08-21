@@ -22,5 +22,9 @@ FRAME_RATE = 30
 FACE_MODEL_NAME = "buffalo_l"
 FACE_MODEL_PROVIDERS = ["CPUExecutionProvider"]
 
+# Validation constants
+MAX_VIDEO_SIZE_MB = 20
+ALLOWED_STICKER_EXTENSIONS = ("png", "jpg", "jpeg")
+
 
 
