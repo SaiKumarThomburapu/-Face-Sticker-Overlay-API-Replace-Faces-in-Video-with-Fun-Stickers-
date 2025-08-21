@@ -9,15 +9,14 @@ from src.constants import *
 from src.exceptions import CustomException
 
 class Clusterer:
-    def __init__(self, config=ClustererConfig):
-        self.clusterer=config
-        #self.clusterer=ClustererConfig(config=ConfigEntity())
+    def __init__(self):
+        self.config=ClustererConfig(config=ConfigEntity()) 
         logging.info("Clusterer initialized")
 
     def cluster(self, faces):
         try:
             embeddings = np.array([f["embedding"] for f in faces])
-            db = DBSCAN(eps=self.clusterer.eps, min_samples=self.clusterer.min_samples, metric=self.clusterer.metric).fit(embeddings)
+            db = DBSCAN(eps=self.config.eps, min_samples=self.config.min_samples, metric=self.config.metric).fit(embeddings)
             labels = db.labels_
             clustered = {}
             for i, lbl in enumerate(labels):
