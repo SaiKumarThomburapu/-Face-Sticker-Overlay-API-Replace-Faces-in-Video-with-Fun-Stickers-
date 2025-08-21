@@ -10,16 +10,12 @@ from src.constants import *
 from insightface.app import FaceAnalysis
 
 class FaceExtractor:
-    def __init__(self, config=FaceExtractorConfig):
-        self.config=config
+    def __init__(self):
+        self.config=FaceExtractorConfig(config=ConfigEntity()) 
         self.face_app=FaceAnalysis(
             name=self.config.face_model_name,
             providers=self.config.face_model_providers
         )
-        
-        #self.config=FaceExtractorConfig(config=ConfigEntity(), session_id=session_id)
-
-        #self.face_app = FaceAnalysis(name=FACE_MODEL_NAME, providers=FACE_MODEL_PROVIDERS)
         self.face_app.prepare(ctx_id=0)
     
         logging.info("FaceExtractor initialized")
